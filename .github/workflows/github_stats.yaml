@@ -41,4 +41,3 @@ jobs:
         git add generated/
         git commit -m 'Update generated files' || echo
         git push origin github_stats_output -f
-ß
