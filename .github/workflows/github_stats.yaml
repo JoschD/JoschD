@@ -10,6 +10,9 @@ on:
 env:
   UV_COMPILE_BYTECODE: 1
   python-version: "3.13"
+  working-directory: github_stats  # name of the dir in the repo
+  output-dir: generated            # name of the dir the images are written out to
+  output-branch: github_stats_output  # name of the dir in the repo
 
 defaults:
   run:
@@ -21,11 +24,6 @@ jobs:
     permissions:
       contents: write
 
-    vars:
-      working-directory: github_stats  # name of the dir in the repo
-      output-dir: generated            # name of the dir the images are written out to
-      output-branch: github_stats_output  # name of the dir in the repo
-
     steps:
       - uses: actions/checkout@v5
 
@@ -33,10 +31,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ env.python-version }}
-          cache-dependency-glob: ${{ vars.working-directory }}/*.py
+          cache-dependency-glob: ${{ env.working-directory }}/*.py
 
       - name: Run
-        working-directory: ${{ vars.working-directory }}
+        working-directory: ${{ env.working-directory }}
         run: uv run generate_images.py
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -51,6 +49,6 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m 'temp commit' || echo
-          git checkout ${{ vars.output-branch }} 2>/dev/null || git checkout --orphan ${{ vars.output-branch }} && git rm -rf . && git checkout main -- ${{ vars.working-directory }}/${{ vars.output-dir }}
+          git checkout $output-branch 2>/dev/null || git checkout --orphan $output-branch && git rm -rf . && git checkout main -- $working-directory/$vars.output-dir
           git commit -m 'Update generated files' || echo
-          git push origin ${{ vars.output-branch }} -f
+          git push origin $output-branch -f
