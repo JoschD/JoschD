@@ -18,7 +18,7 @@ defaults:
     shell: bash
 
 jobs:
-  github-stats:
+  githubstats:
     runs-on: ubuntu-latest
 
     steps:
