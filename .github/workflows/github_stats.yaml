@@ -28,10 +28,17 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ env.python-version }}
+          cache-dependency-glob: 'github_stats/*.py'
 
       - name: Run
         working-directory: ./github_stats
         run: uv run generate_images.py
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXCLUDED: ${{ secrets.EXCLUDED }}
+          EXCLUDED_LANGS: ${{ secrets.EXCLUDED_LANGS }}
+          COUNT_STATS_FROM_FORKS: ${{ secrets.COUNT_STATS_FROM_FORKS }}
     
       - name: Commit
         run: |
