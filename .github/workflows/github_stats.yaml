@@ -1,7 +1,5 @@
-# Cancel (by default) in-progress workflows when pushing a new commit on the same branch
 name: Generate Stats Images
 
-# Controls when the action will run. Triggers the workflow on push events
 on:
   push:
     branches: [ main ]
@@ -13,6 +11,11 @@ env:
   UV_COMPILE_BYTECODE: 1
   python-version: "3.13"
 
+vars:
+  working-directory: github_stats  # name of the dir in the repo
+  output-dir: generated            # name of the dir the images are written out to
+  output-branch: github_stats_output  # name of the dir in the repo
+
 defaults:
   run:
     shell: bash
@@ -20,6 +23,8 @@ defaults:
 jobs:
   githubstats:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v5
@@ -28,10 +33,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ env.python-version }}
-          cache-dependency-glob: 'github_stats/*.py'
+          cache-dependency-glob: ${{ vars.working-directory }}/*.py
 
       - name: Run
-        working-directory: ./github_stats
+        working-directory: ${{ vars.working-directory }}
         run: uv run generate_images.py
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -44,6 +49,8 @@ jobs:
         run: |
           git config --global user.name "github-stats[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add generated/
+          git add .
+          git commit -m 'temp commit' || echo
+          git checkout ${{ vars.output-branch }} 2>/dev/null || git checkout --orphan ${{ vars.output-branch }} && git rm -rf . && git checkout main -- ${{ vars.working-directory }}/${{ vars.output-dir }}
           git commit -m 'Update generated files' || echo
-          git push origin github_stats_output -f
+          git push origin ${{ vars.output-branch }} -f
