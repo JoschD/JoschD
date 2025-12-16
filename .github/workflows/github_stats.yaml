@@ -11,11 +11,6 @@ env:
   UV_COMPILE_BYTECODE: 1
   python-version: "3.13"
 
-vars:
-  working-directory: github_stats  # name of the dir in the repo
-  output-dir: generated            # name of the dir the images are written out to
-  output-branch: github_stats_output  # name of the dir in the repo
-
 defaults:
   run:
     shell: bash
@@ -25,6 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
+    vars:
+      working-directory: github_stats  # name of the dir in the repo
+      output-dir: generated            # name of the dir the images are written out to
+      output-branch: github_stats_output  # name of the dir in the repo
 
     steps:
       - uses: actions/checkout@v5
