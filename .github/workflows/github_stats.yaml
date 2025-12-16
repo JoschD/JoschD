@@ -1,0 +1,44 @@
+# Cancel (by default) in-progress workflows when pushing a new commit on the same branch
+name: Generate Stats Images
+
+# Controls when the action will run. Triggers the workflow on push events
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+env:
+  UV_COMPILE_BYTECODE: 1
+  python-version: "3.13"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  github-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ env.python-version }}
+
+      - name: Run
+        working-directory: ./github_stats
+        run: uv run generate_images.py
+    
+    # Commits all changed files to the repository
+    - name: Commit to the github_stats_output branch of repo
+      run: |
+        git config --global user.name "github-stats[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add generated/
+        git commit -m 'Update generated files' || echo
+        git push origin github_stats_output -f
+ß
